@@ -1,0 +1,10 @@
+nurse_id,name,skill_level,max_hours_per_week
+N1,Alice,GENERAL,40
+N2,Bob,GENERAL,36
+N3,Carol,ICU,40
+N4,Dan,GENERAL,32
+N5,Eva,ICU,40
+N6,Frank,GENERAL,36
+N7,Grace,GENERAL,40
+N8,Helen,ICU,32
+
