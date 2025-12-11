@@ -2,7 +2,7 @@
 
 Prescriptive analytics app for automated nurse shift scheduling using mixed-integer optimization and Streamlit.
 
-## Problem
+## The Problem
 
 Hospitals must staff daily shifts while respecting nurse availability, skills, hour limits, and overtime costs. Manual scheduling is error-prone and slow, making it a strong candidate for prescriptive analytics.
 
@@ -14,6 +14,9 @@ NurseShiftly formulates scheduling as a mixed-integer linear program (MILP) with
 - Continuous overtime variables (optional)  
 - Objective: minimize total overtime cost  
 - Constraints: shift coverage, availability, skill matching (ICU vs. General), weekly hour limits, valid overtime
+
+## Live Demo
+http://10.0.0.188:8501/
 
 ## Project Structure
 
@@ -40,22 +43,23 @@ Sample CSVs are provided in `data/`.
 2) Install dependencies: `pip install -r requirements.txt`  
 3) Launch Streamlit: `streamlit run app.py`  
 4) In the app sidebar, upload your CSVs or click **Use Sample Data**  
-5) Adjust overtime settings and click **Generate Schedule**
+5) Adjust overtime, understaff, and nurse preference settings.
+6) Finish by clicking **Generate Schedule**
 
 Outputs include solver status, assignment table, nurse×shift matrix, overtime summary, and a downloadable CSV.
 
-## Screenshot
+## About This Project
 
-_(Insert Streamlit UI screenshot here.)_
+Built for ISOM 839 (Prescriptive Analytics) at Suffolk University.
+
+**Author:** Marie Bermudez
+**Email:** Marie.Bermudez@su.suffolk.com
 
 ## Future Work
 
-- Fairness penalties to balance workloads  
-- Preference scoring for nurse-shift matches  
+- Fairness penalties to balance workloads 
 - Shift sequencing/rest constraints  
 - Robustness to demand uncertainty  
 - Solver warm-starts and scenario comparisons
 
-### Preferences (optional)
 
-You can include a `preferences.csv` with columns: `nurse_id,shift_id,score`. In the app, set a positive **Preference weight** to reward higher scores in the objective; leave it at 0 to ignore preferences. Preferences act as a reward term, while overtime and understaff weights act as penalties.
