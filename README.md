@@ -56,3 +56,7 @@ _(Insert Streamlit UI screenshot here.)_
 - Robustness to demand uncertainty  
 - Solver warm-starts and scenario comparisons
 
+### Preferences (optional)
+
+You can include a `preferences.csv` with columns: `nurse_id,shift_id,score`. In the app, set a positive **Preference weight** to reward higher scores in the objective; leave it at 0 to ignore preferences. Preferences act as a reward term, while overtime and understaff weights act as penalties.
+

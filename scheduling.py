@@ -2,7 +2,17 @@ import pandas as pd
 import pulp
 
 
-def optimize_schedule(nurses_df: pd.DataFrame, shifts_df: pd.DataFrame, availability_df: pd.DataFrame, allow_overtime: bool = True, overtime_cost: float = 10.0):
+def optimize_schedule(
+    nurses_df: pd.DataFrame,
+    shifts_df: pd.DataFrame,
+    availability_df: pd.DataFrame,
+    allow_overtime: bool = True,
+    overtime_cost: float = 10.0,
+    allow_understaff: bool = False,
+    understaff_penalty: float = 50.0,
+    preferences_df: pd.DataFrame | None = None,
+    preference_weight: float = 0.0,
+):
     """
     Build and solve the nurse scheduling MILP.
 
@@ -29,20 +39,37 @@ def optimize_schedule(nurses_df: pd.DataFrame, shifts_df: pd.DataFrame, availabi
     for _, row in availability_df.iterrows():
         availability_lookup[(row["nurse_id"], row["shift_id"])] = int(row["available"])
 
+    preference_lookup = {}
+    if preferences_df is not None and not preferences_df.empty and preference_weight != 0:
+        for _, row in preferences_df.iterrows():
+            preference_lookup[(row["nurse_id"], row["shift_id"])] = float(row["score"])
+
     # Model
     model = pulp.LpProblem("NurseShiftly", pulp.LpMinimize)
 
     # Decision variables
     x = pulp.LpVariable.dicts("assign", (nurses, shifts), lowBound=0, upBound=1, cat="Binary")
     o = pulp.LpVariable.dicts("overtime", nurses, lowBound=0, cat="Continuous")
+    u = pulp.LpVariable.dicts("unmet", shifts, lowBound=0, cat="Continuous")  # understaffing slack
 
-    # Objective: minimize total overtime cost
-    model += pulp.lpSum(overtime_cost * o[n] for n in nurses)
+    # Objective: minimize total overtime + understaff penalty
+    # Preference scores act as a reward (subtracted from the objective).
+    model += (
+        pulp.lpSum(overtime_cost * o[n] for n in nurses)
+        + pulp.lpSum(understaff_penalty * u[s] for s in shifts)
+        - pulp.lpSum(
+            preference_weight * preference_lookup.get((n, s), 0.0) * x[n][s]
+            for n in nurses
+            for s in shifts
+        )
+    )
 
     # Constraints
     # Shift coverage
     for s in shifts:
-        model += pulp.lpSum(x[n][s] for n in nurses) >= shift_demand[s], f"coverage_{s}"
+        model += pulp.lpSum(x[n][s] for n in nurses) + u[s] >= shift_demand[s], f"coverage_{s}"
+        if not allow_understaff:
+            model += u[s] == 0, f"no_understaff_{s}"
 
     # Availability and skill
     for n in nurses:
@@ -77,7 +104,8 @@ def optimize_schedule(nurses_df: pd.DataFrame, shifts_df: pd.DataFrame, availabi
 
     assignments_df = pd.DataFrame(assignment_rows)
     overtime_dict = {n: float(pulp.value(o[n])) for n in nurses}
+    unmet_demand = {s: float(pulp.value(u[s])) for s in shifts}
 
-    return assignments_df, overtime_dict, status
+    return assignments_df, overtime_dict, unmet_demand, status
 
 
