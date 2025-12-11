@@ -4,7 +4,9 @@ Prescriptive analytics app for automated nurse shift scheduling using mixed-inte
 
 ## The Problem
 
-Hospitals must staff daily shifts while respecting nurse availability, skills, hour limits, and overtime costs. Manual scheduling is error-prone and slow, making it a strong candidate for prescriptive analytics.
+Hospitals need to assign nurses to daily shifts while meeting staffing requirements, respecting nurse availability, enforcing skill requirements like ICU certification, and staying within weekly hour limits.
+
+This is a challenging problem because these constraints often conflict. For example, night shifts may require ICU-trained nurses, but those nurses also have limited availability and hour caps. As a result, scheduling is often done manually in spreadsheets, which is time-consuming and can lead to understaffing, excessive overtime, or unfair workloads.
 
 ## Optimization Approach
 
